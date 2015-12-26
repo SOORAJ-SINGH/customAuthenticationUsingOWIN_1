@@ -14,6 +14,9 @@ namespace IdentitySample_2
     {
         public void Configuration(IAppBuilder app)
         {
+            // Configure the db context, user manager and signin manager to use a single instance per request 
+            app.CreatePerOwinContext(ApplicationDbContext.Create);
+            
             // ConfigureAuth(app);
             app.UseCookieAuthentication(new CookieAuthenticationOptions
             {

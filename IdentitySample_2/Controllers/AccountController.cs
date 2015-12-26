@@ -37,10 +37,12 @@ namespace IdentitySample_2.Controllers
             {
                 var userStore = new UserStore<ApplicationUser>( dbContext );
                 var userManager = new UserManager<ApplicationUser>(userStore);
-
+                
+                
                 var signInManager = new SignInManager<ApplicationUser, string>(userManager, AuthenticationManager);
-                var user = new IdentityUser { UserName = model.UserName };
+                var user = new ApplicationUser { UserName = model.UserName };
 
+                
                 //sign in  the user.
                 //await signInManager.SignInAsync(user, false, false);
                 var signInStatus = await signInManager.PasswordSignInAsync(model.UserName, model.Password, false, true);
