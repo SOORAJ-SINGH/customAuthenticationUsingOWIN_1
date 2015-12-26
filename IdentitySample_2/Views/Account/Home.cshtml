@@ -1,0 +1,16 @@
+﻿
+@{
+    ViewBag.Title = "Default";
+}
+
+<h2>Default</h2>
+
+@if (Request.IsAuthenticated)
+{
+    <h2><strong>@User.Identity.Name</strong></h2> @Html.ActionLink("Sign Out", "SignOut")
+    <h3>This User is Authenticated.<br />Type:<strong> @User.Identity.AuthenticationType </strong></h3>
+}
+else
+{
+    <h3>Please @Html.ActionLink("Login In","Login") Again</h3>
+}
