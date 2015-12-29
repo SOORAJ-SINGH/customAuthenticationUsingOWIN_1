@@ -167,6 +167,15 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201512281458318_added the new propertities in userTable.cs" />
+    <Compile Include="Migrations\201512281458318_added the new propertities in userTable.Designer.cs">
+      <DependentUpon>201512281458318_added the new propertities in userTable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201512291505006_newSeed.cs" />
+    <Compile Include="Migrations\201512291505006_newSeed.Designer.cs">
+      <DependentUpon>201512291505006_newSeed.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\IdentityModel.cs" />
     <Compile Include="Models\AccountViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -195,6 +204,14 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201512281458318_added the new propertities in userTable.resx">
+      <DependentUpon>201512281458318_added the new propertities in userTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201512291505006_newSeed.resx">
+      <DependentUpon>201512291505006_newSeed.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

@@ -147,6 +147,93 @@ new SelectListItem { Value = rr.Name.ToString(), Text = rr.Name }).ToList();
 
 
 
+        //get the roles of user 
+        
+        [ValidateAntiForgeryToken]
+        public ActionResult GetRoles(string userName)
+        {
+            if (!string.IsNullOrWhiteSpace(userName))
+            {
+                List<string> userRoles;
+                List<string> roles;
+                List<string> users;
+                using (var context = new ApplicationDbContext())
+                {
+                    var roleStore = new RoleStore<IdentityRole>(context);
+                    var roleManager = new RoleManager<IdentityRole>(roleStore);
+
+                    roles = (from r in roleManager.Roles select r.Name).ToList();
+
+                    var userStore = new UserStore<ApplicationUser>(context);
+                    var userManager = new UserManager<ApplicationUser>(userStore);
+
+                    users = (from u in userManager.Users select u.UserName).ToList();
+
+                    var user = userManager.FindByName(userName);
+                    if (user == null)
+                        throw new Exception("User not found!");
+
+                    var userRoleIds = (from r in user.Roles select r.RoleId);
+                    userRoles = (from id in userRoleIds
+                                 let r = roleManager.FindById(id)
+                                 select r.Name).ToList();
+                }
+
+                ViewBag.Roles = new SelectList(roles);
+                ViewBag.Users = new SelectList(users);
+                ViewBag.RolesForThisUser = userRoles;
+            }
+
+            return View("RoleAddToUser");
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteRoleForUser(string userName, string roleName)
+        {
+            List<string> userRoles;
+            List<string> roles;
+            List<string> users;
+            using (var context = new ApplicationDbContext())
+            {
+                var roleStore = new RoleStore<IdentityRole>(context);
+                var roleManager = new RoleManager<IdentityRole>(roleStore);
+
+                roles = (from r in roleManager.Roles select r.Name).ToList();
+
+                var userStore = new UserStore<ApplicationUser>(context);
+                var userManager = new UserManager<ApplicationUser>(userStore);
+
+                users = (from u in userManager.Users select u.UserName).ToList();
+
+                var user = userManager.FindByName(userName);
+                if (user == null)
+                    throw new Exception("User not found!");
+
+                if (userManager.IsInRole(user.Id, roleName))
+                {
+                    userManager.RemoveFromRole(user.Id, roleName);
+                    context.SaveChanges();
+
+                    ViewBag.ResultMessage = "Role removed from this user successfully !";
+                }
+                else
+                {
+                    ViewBag.ResultMessage = "This user doesn't belong to selected role.";
+                }
+
+                var userRoleIds = (from r in user.Roles select r.RoleId);
+                userRoles = (from id in userRoleIds
+                             let r = roleManager.FindById(id)
+                             select r.Name).ToList();
+            }
+
+            ViewBag.RolesForThisUser = userRoles;
+            ViewBag.Roles = new SelectList(roles);
+            ViewBag.Users = new SelectList(users);
+            return View("RoleAddToUser");
+        }
 
     }
 }

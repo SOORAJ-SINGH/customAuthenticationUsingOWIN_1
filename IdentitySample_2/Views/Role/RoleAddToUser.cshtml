@@ -7,7 +7,7 @@
     @Html.ActionLink("Create New Role", "RoleCreate") | @Html.ActionLink("Roles", "RoleIndex")
 
     <h2>Add role to user</h2>
-    @using (Html.BeginForm("RoleAddToUser", "Account"))
+    @using (Html.BeginForm("RoleAddToUser", "Role"))
     {
         @Html.AntiForgeryToken()
         @Html.ValidationSummary(true)
@@ -22,7 +22,7 @@
     }
 
     <h2>Remove role from user</h2>
-    @using (Html.BeginForm("DeleteRoleForUser", "Account"))
+    @using (Html.BeginForm("DeleteRoleForUser", "Role"))
     {
         @Html.AntiForgeryToken()
         @Html.ValidationSummary(true)
@@ -36,7 +36,7 @@
     }
 
     <h2>List roles for user</h2>
-    @using (Html.BeginForm("GetRoles", "Account"))
+    @using (Html.BeginForm("GetRoles", "Role"))
     {
         @Html.AntiForgeryToken()
         <p>
