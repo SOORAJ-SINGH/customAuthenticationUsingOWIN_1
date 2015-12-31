@@ -13,6 +13,9 @@ namespace IdentitySample_2
         {
             AreaRegistration.RegisterAllAreas();
             RouteConfig.RegisterRoutes(RouteTable.Routes);
+
+            
+            
         }
     }
 }

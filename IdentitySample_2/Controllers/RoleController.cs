@@ -1,6 +1,8 @@
-﻿using IdentitySample_2.Models;
+﻿using IdentitySample_2.App_Start;
+using IdentitySample_2.Models;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.AspNet.Identity.Owin;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +11,48 @@ using System.Web.Mvc;
 
 namespace IdentitySample_2.Controllers
 {
-    [Authorize(Roles = "ADMIN")]
+    //[Authorize(Roles = "ADMIN")]
     public class RoleController : Controller
     {
         ApplicationDbContext dbContext = new ApplicationDbContext();
+        List<string> userRolesList;
+        List<string> rolesList;
+        List<string> usersList;
+
+        private ApplicationUserManager _userManager;
+        private ApplicationRoleManager _roleManager;
+
+        public RoleController()
+        { }
+        public RoleController(ApplicationUserManager userManager,ApplicationRoleManager roleManager)
+        {
+            _userManager = userManager;
+            _roleManager = roleManager;
+        }
+
+        public ApplicationUserManager UserManager
+        {
+            get
+            {
+                return _userManager ?? HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            }
+            set
+            {
+                _userManager = value;
+            }
+        }
+        
+        public ApplicationRoleManager RoleManager
+        {
+            get
+            {
+                return _roleManager ?? HttpContext.GetOwinContext().Get<ApplicationRoleManager>();
+            }
+            set
+            {
+                _roleManager = value;
+            }
+        }
 
         // GET: Role
         public ActionResult Index()
@@ -71,7 +111,7 @@ namespace IdentitySample_2.Controllers
         //manages the user's Role
         public ActionResult ManageUserRoles()
         {
-            // prepopulat roles for the view dropdown
+            // prepopulate roles for the view dropdown
             var list = dbContext.Roles.OrderBy(r => r.Name).ToList().Select(rr =>
 
 new SelectListItem { Value = rr.Name.ToString(), Text = rr.Name }).ToList();
@@ -79,47 +119,49 @@ new SelectListItem { Value = rr.Name.ToString(), Text = rr.Name }).ToList();
             return View();
         }
 
+
+
         public ActionResult RoleAddToUser()
         {
-            List<string> roles;
-            List<string> users;
+
             using (var context = new ApplicationDbContext())
             {
-                var roleStore = new RoleStore<IdentityRole>(context);
-                var roleManager = new RoleManager<IdentityRole>(roleStore);
+                //var roleStore = new RoleStore<IdentityRole>(context);
+                //var roleManager = new RoleManager<IdentityRole>(roleStore);
 
                 var userStore = new UserStore<ApplicationUser>(context);
                 var userManager = new UserManager<ApplicationUser>(userStore);
 
-                users = (from u in userManager.Users select u.UserName).ToList();
-                roles = (from r in roleManager.Roles select r.Name).ToList();
+                usersList = (from u in userManager.Users select u.UserName).ToList();
+                rolesList = (from r in  RoleManager.Roles select r.Name).ToList();
             }
 
-            ViewBag.Roles = new SelectList(roles);
-            ViewBag.Users = new SelectList(users);
+            ViewBag.Roles = new SelectList(rolesList);
+            ViewBag.Users = new SelectList(usersList);
             return View();
         }
 
         [HttpPost]
         public ActionResult RoleAddToUser(string userName,string roleName)
         {
-            List<string> roles;
-            List<string> users;
+
+
             using (var context = new ApplicationDbContext())
             {
-                var roleStore = new RoleStore<IdentityRole>(context);
-                var roleManager = new RoleManager<IdentityRole>(roleStore);
+                //var roleStore = new RoleStore<IdentityRole>(context);
+                //var roleManager = new RoleManager<IdentityRole>(roleStore);
+
 
                 var userStore = new UserStore<ApplicationUser>(context);
                 var userManager = new UserManager<ApplicationUser>(userStore);
 
-                users = (from u in userManager.Users select u.UserName).ToList();
+                usersList = (from u in userManager.Users select u.UserName).ToList();
 
                 var user = userManager.FindByName(userName);
                 if (user == null)
                     throw new Exception("User not found!");
 
-                var role = roleManager.FindByName(roleName);
+                var role = RoleManager.FindByName(roleName);// roleManager.FindByName(roleName);
                 if (role == null)
                     throw new Exception("Role not found!");
 
@@ -129,17 +171,18 @@ new SelectListItem { Value = rr.Name.ToString(), Text = rr.Name }).ToList();
                 }
                 else
                 {
+                    
                     userManager.AddToRole(user.Id, role.Name);
                     context.SaveChanges();
 
                     ViewBag.ResultMessage = "Username added to the role succesfully !";
                 }
 
-                roles = (from r in roleManager.Roles select r.Name).ToList();
+                rolesList = (from r in RoleManager.Roles select r.Name).ToList();
             }
 
-            ViewBag.Roles = new SelectList(roles);
-            ViewBag.Users = new SelectList(users);
+            ViewBag.Roles = new SelectList(rolesList);
+            ViewBag.Users = new SelectList(usersList);
             return View();
    
 
@@ -154,34 +197,32 @@ new SelectListItem { Value = rr.Name.ToString(), Text = rr.Name }).ToList();
         {
             if (!string.IsNullOrWhiteSpace(userName))
             {
-                List<string> userRoles;
-                List<string> roles;
-                List<string> users;
+
                 using (var context = new ApplicationDbContext())
                 {
-                    var roleStore = new RoleStore<IdentityRole>(context);
-                    var roleManager = new RoleManager<IdentityRole>(roleStore);
+                    //var roleStore = new RoleStore<IdentityRole>(context);
+                    //var roleManager = new RoleManager<IdentityRole>(roleStore);
 
-                    roles = (from r in roleManager.Roles select r.Name).ToList();
+                    rolesList = (from r in RoleManager.Roles select r.Name).ToList();
 
                     var userStore = new UserStore<ApplicationUser>(context);
                     var userManager = new UserManager<ApplicationUser>(userStore);
 
-                    users = (from u in userManager.Users select u.UserName).ToList();
+                    usersList = (from u in userManager.Users select u.UserName).ToList();
 
                     var user = userManager.FindByName(userName);
                     if (user == null)
                         throw new Exception("User not found!");
 
                     var userRoleIds = (from r in user.Roles select r.RoleId);
-                    userRoles = (from id in userRoleIds
-                                 let r = roleManager.FindById(id)
+                    userRolesList = (from id in userRoleIds
+                                 let r = RoleManager.FindById(id)
                                  select r.Name).ToList();
                 }
 
-                ViewBag.Roles = new SelectList(roles);
-                ViewBag.Users = new SelectList(users);
-                ViewBag.RolesForThisUser = userRoles;
+                ViewBag.Roles = new SelectList(rolesList);
+                ViewBag.Users = new SelectList(usersList);
+                ViewBag.RolesForThisUser = userRolesList;
             }
 
             return View("RoleAddToUser");
@@ -197,10 +238,10 @@ new SelectListItem { Value = rr.Name.ToString(), Text = rr.Name }).ToList();
             List<string> users;
             using (var context = new ApplicationDbContext())
             {
-                var roleStore = new RoleStore<IdentityRole>(context);
-                var roleManager = new RoleManager<IdentityRole>(roleStore);
+                //var roleStore = new RoleStore<IdentityRole>(context);
+                //var roleManager = new RoleManager<IdentityRole>(roleStore);
 
-                roles = (from r in roleManager.Roles select r.Name).ToList();
+                roles = (from r in RoleManager.Roles select r.Name).ToList();
 
                 var userStore = new UserStore<ApplicationUser>(context);
                 var userManager = new UserManager<ApplicationUser>(userStore);
@@ -225,7 +266,7 @@ new SelectListItem { Value = rr.Name.ToString(), Text = rr.Name }).ToList();
 
                 var userRoleIds = (from r in user.Roles select r.RoleId);
                 userRoles = (from id in userRoleIds
-                             let r = roleManager.FindById(id)
+                             let r = RoleManager.FindById(id)
                              select r.Name).ToList();
             }
 

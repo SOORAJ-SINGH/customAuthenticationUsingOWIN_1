@@ -6,12 +6,52 @@ using Microsoft.AspNet.Identity;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
-
+using IdentitySample_2.App_Start;
 
 namespace IdentitySample_2.Controllers
 {
     public class AccountController : Controller
     {
+        private ApplicationUserManager _userManager;
+        private ApplicationSignInManager _signManager;
+
+        ApplicationDbContext dbContext;
+
+        //constructor
+        public AccountController()
+        {
+        }
+
+        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
+        {
+            UserManager = userManager;
+            SignInManager = signInManager;
+        }
+        public ApplicationUserManager UserManager
+        {
+            get
+            {
+                return _userManager ?? HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            }
+            set
+            {
+                _userManager = value;
+            }
+        }
+
+        public ApplicationSignInManager SignInManager
+        {
+            get
+            {
+                return _signManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
+            }
+            set
+            {
+                _signManager = value;
+            }
+        }
+
+
 
         private IAuthenticationManager AuthenticationManager
         {
@@ -21,7 +61,11 @@ namespace IdentitySample_2.Controllers
             }
         }
 
-        ApplicationDbContext dbContext = new ApplicationDbContext();
+
+
+
+
+
 
         // GET: Account/Login
         [AllowAnonymous]
@@ -31,27 +75,29 @@ namespace IdentitySample_2.Controllers
         }
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult> Login(LoginViewModel model,string returnUrl)
+        public async Task<ActionResult> Login(LoginViewModel model, string returnUrl)
         {
+            dbContext = new ApplicationDbContext();
+
             if (ModelState.IsValid)
             {
-                var userStore = new UserStore<ApplicationUser>( dbContext );
-                var userManager = new UserManager<ApplicationUser>(userStore);
-                
-                
-                var signInManager = new SignInManager<ApplicationUser, string>(userManager, AuthenticationManager);
-                var user = new ApplicationUser { UserName = model.UserName };
+                //var userStore = new UserStore<ApplicationUser>(dbContext);
+                //var userManager = new UserManager<ApplicationUser>(userStore);
 
-                
+
+                //var signInManager = new SignInManager<ApplicationUser, string>(userManager, AuthenticationManager);
+                //var user = new ApplicationUser { UserName = model.UserName };
+
+
                 //sign in  the user.
                 //await signInManager.SignInAsync(user, false, false);
-                var signInStatus = await signInManager.PasswordSignInAsync(model.UserName, model.Password, false, true);
+                var signInStatus = await SignInManager.PasswordSignInAsync(model.UserName, model.Password, false, shouldLockout: false);
 
                 switch (signInStatus)
                 {
                     case SignInStatus.Success:
                         return RedirectToLocal(returnUrl);
-                       
+
                     case SignInStatus.LockedOut:
                         break;
                     case SignInStatus.RequiresVerification:
@@ -95,13 +141,15 @@ namespace IdentitySample_2.Controllers
         {
             if (ModelState.IsValid)
             {
-                var userStore = new UserStore<ApplicationUser>(dbContext);
-                var userManager = new UserManager<ApplicationUser>(userStore);
+                dbContext = new ApplicationDbContext();
 
-                var signInManager = new SignInManager<ApplicationUser, string>(userManager, AuthenticationManager);
+                //var userStore = new UserStore<ApplicationUser>(dbContext);
+                //var userManager = new UserManager<ApplicationUser>(userStore);
+                //var signInManager = new SignInManager<ApplicationUser, string>(userManager, AuthenticationManager);
 
                 //find user exixts in db
-                var user = await userManager.FindAsync(register.UserName, register.Password);
+                var user = await UserManager.FindAsync(register.UserName,register.Password);
+                //var user = await userManager.FindAsync(register.UserName, register.Password);
                 if (user != null)
                 {
                     return View();
@@ -110,13 +158,13 @@ namespace IdentitySample_2.Controllers
                 //if not create the user
                 user = new ApplicationUser { UserName = register.UserName, Email = register.EamilID };
 
-                var result = await userManager.CreateAsync(user, register.Password);
+                var result = await UserManager.CreateAsync(user, register.Password);
                 if (result.Succeeded)
                 {
                     //sign in  the user.
                     //await signInManager.SignInAsync(user, false, false);
-                    var signInStatus = await signInManager.PasswordSignInAsync(register.UserName, register.Password, false, true);
-
+                    var signInStatus = await SignInManager.PasswordSignInAsync(register.UserName, register.Password, false, true);
+                    return RedirectToAction("Home");
                 }
 
                 return View();
@@ -132,6 +180,6 @@ namespace IdentitySample_2.Controllers
         {
             return View();
         }
-        
+
     }
 }
