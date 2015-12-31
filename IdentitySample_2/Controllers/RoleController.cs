@@ -129,10 +129,10 @@ new SelectListItem { Value = rr.Name.ToString(), Text = rr.Name }).ToList();
                 //var roleStore = new RoleStore<IdentityRole>(context);
                 //var roleManager = new RoleManager<IdentityRole>(roleStore);
 
-                var userStore = new UserStore<ApplicationUser>(context);
-                var userManager = new UserManager<ApplicationUser>(userStore);
+                //var userStore = new UserStore<ApplicationUser>(context);
+                //var userManager = new UserManager<ApplicationUser>(userStore);
 
-                usersList = (from u in userManager.Users select u.UserName).ToList();
+                usersList = (from u in UserManager.Users select u.UserName).ToList();
                 rolesList = (from r in  RoleManager.Roles select r.Name).ToList();
             }
 
@@ -152,12 +152,12 @@ new SelectListItem { Value = rr.Name.ToString(), Text = rr.Name }).ToList();
                 //var roleManager = new RoleManager<IdentityRole>(roleStore);
 
 
-                var userStore = new UserStore<ApplicationUser>(context);
-                var userManager = new UserManager<ApplicationUser>(userStore);
+                //var userStore = new UserStore<ApplicationUser>(context);
+                //var userManager = new UserManager<ApplicationUser>(userStore);
 
-                usersList = (from u in userManager.Users select u.UserName).ToList();
+                usersList = (from u in UserManager.Users select u.UserName).ToList();
 
-                var user = userManager.FindByName(userName);
+                var user = UserManager.FindByName(userName);
                 if (user == null)
                     throw new Exception("User not found!");
 
@@ -165,14 +165,14 @@ new SelectListItem { Value = rr.Name.ToString(), Text = rr.Name }).ToList();
                 if (role == null)
                     throw new Exception("Role not found!");
 
-                if (userManager.IsInRole(user.Id, role.Name))
+                if (UserManager.IsInRole(user.Id, role.Name))
                 {
                     ViewBag.ResultMessage = "This user already has the role specified !";
                 }
                 else
                 {
                     
-                    userManager.AddToRole(user.Id, role.Name);
+                    UserManager.AddToRole(user.Id, role.Name);
                     context.SaveChanges();
 
                     ViewBag.ResultMessage = "Username added to the role succesfully !";
@@ -205,12 +205,12 @@ new SelectListItem { Value = rr.Name.ToString(), Text = rr.Name }).ToList();
 
                     rolesList = (from r in RoleManager.Roles select r.Name).ToList();
 
-                    var userStore = new UserStore<ApplicationUser>(context);
-                    var userManager = new UserManager<ApplicationUser>(userStore);
+                    //var userStore = new UserStore<ApplicationUser>(context);
+                    //var userManager = new UserManager<ApplicationUser>(userStore);
 
-                    usersList = (from u in userManager.Users select u.UserName).ToList();
+                    usersList = (from u in UserManager.Users select u.UserName).ToList();
 
-                    var user = userManager.FindByName(userName);
+                    var user = UserManager.FindByName(userName);
                     if (user == null)
                         throw new Exception("User not found!");
 
@@ -243,18 +243,18 @@ new SelectListItem { Value = rr.Name.ToString(), Text = rr.Name }).ToList();
 
                 roles = (from r in RoleManager.Roles select r.Name).ToList();
 
-                var userStore = new UserStore<ApplicationUser>(context);
-                var userManager = new UserManager<ApplicationUser>(userStore);
+                //var userStore = new UserStore<ApplicationUser>(context);
+                //var userManager = new UserManager<ApplicationUser>(userStore);
 
-                users = (from u in userManager.Users select u.UserName).ToList();
+                users = (from u in UserManager.Users select u.UserName).ToList();
 
-                var user = userManager.FindByName(userName);
+                var user = UserManager.FindByName(userName);
                 if (user == null)
                     throw new Exception("User not found!");
 
-                if (userManager.IsInRole(user.Id, roleName))
+                if (UserManager.IsInRole(user.Id, roleName))
                 {
-                    userManager.RemoveFromRole(user.Id, roleName);
+                    UserManager.RemoveFromRole(user.Id, roleName);
                     context.SaveChanges();
 
                     ViewBag.ResultMessage = "Role removed from this user successfully !";
